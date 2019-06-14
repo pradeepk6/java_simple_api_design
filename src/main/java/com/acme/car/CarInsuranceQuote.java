@@ -1,9 +1,19 @@
 package com.acme.car;
 
-public interface CarInsuranceQuote {
-    boolean isInsurable();
+import lombok.Getter;
+import lombok.Setter;
 
-    double getQuote();
+@Getter
+@Setter
+public class CarInsuranceQuote {
 
-    String getMessage();
+    private boolean insurable;
+    private double quote;
+    private String message;
+
+    public CarInsuranceQuote(boolean insurable, int quote, String message) {
+        this.insurable = insurable;
+        this.quote = quote;
+        this.message = message;
+    }
 }

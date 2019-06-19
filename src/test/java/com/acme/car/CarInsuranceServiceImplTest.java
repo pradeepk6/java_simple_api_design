@@ -5,7 +5,6 @@ import com.theftwatch.TheftRisk;
 import com.theftwatch.TheftRiskChecker;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -18,23 +17,21 @@ public class CarInsuranceServiceImplTest {
 
     @Mock
     private TheftRiskChecker theftRiskCheckerMock;
-
-    @InjectMocks
+    private RatingEngine ratingEngine;
     private CarInsuranceServiceImpl carInsuranceServiceMock;
-
-    RatingEngine ratingEngine;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         ratingEngine = new SimpleRatingEngine();
+        carInsuranceServiceMock = new CarInsuranceServiceImpl(ratingEngine, theftRiskCheckerMock);
     }
 
     @Test()
     public void testInvalidPostCodeDeniesQuote() {
         when(theftRiskCheckerMock.getRisk(any(String.class))).thenThrow(PostcodeNotFoundException.class);
         CarInsuranceProposal proposal = new CarInsuranceProposal("", 1000);
-        CarInsuranceQuote quote = carInsuranceServiceMock.getQuote(proposal, ratingEngine);
+        CarInsuranceQuote quote = carInsuranceServiceMock.getQuote(proposal);
         assertFalse(quote.isInsurable());
         assertTrue(quote.getMessage().toLowerCase().contains("invalid postcode"));
     }
@@ -43,7 +40,7 @@ public class CarInsuranceServiceImplTest {
     public void testSuccessfulQuoteWithLowRiskAndBelow900() {
         when(theftRiskCheckerMock.getRisk(any(String.class))).thenReturn(TheftRisk.LOW_RISK);
         CarInsuranceProposal proposal = new CarInsuranceProposal("", 899);
-        CarInsuranceQuote quote = carInsuranceServiceMock.getQuote(proposal, ratingEngine);
+        CarInsuranceQuote quote = carInsuranceServiceMock.getQuote(proposal);
         assertTrue(quote.isInsurable());
         assertTrue(quote.getQuote() == 85);
     }
@@ -52,7 +49,7 @@ public class CarInsuranceServiceImplTest {
     public void testSuccessfulQuoteWithLowRiskAndAbove899() {
         when(theftRiskCheckerMock.getRisk(any(String.class))).thenReturn(TheftRisk.LOW_RISK);
         CarInsuranceProposal proposal = new CarInsuranceProposal("", 900);
-        CarInsuranceQuote quote = carInsuranceServiceMock.getQuote(proposal, ratingEngine);
+        CarInsuranceQuote quote = carInsuranceServiceMock.getQuote(proposal);
         assertTrue(quote.isInsurable());
         assertTrue(quote.getQuote() == 180);
     }
@@ -61,7 +58,7 @@ public class CarInsuranceServiceImplTest {
     public void testUnSuccessfulQuoteWithHighRisk() {
         when(theftRiskCheckerMock.getRisk(any(String.class))).thenReturn(TheftRisk.HIGH_RISK);
         CarInsuranceProposal proposal = new CarInsuranceProposal("", 900);
-        CarInsuranceQuote quote = carInsuranceServiceMock.getQuote(proposal, ratingEngine);
+        CarInsuranceQuote quote = carInsuranceServiceMock.getQuote(proposal);
         assertFalse(quote.isInsurable());
         assertTrue(quote.getMessage().toLowerCase().contains("high risk"));
     }
@@ -70,7 +67,7 @@ public class CarInsuranceServiceImplTest {
     public void testUnSuccessfulQuoteWithHighCarValue() {
         when(theftRiskCheckerMock.getRisk(any(String.class))).thenReturn(TheftRisk.LOW_RISK);
         CarInsuranceProposal proposal = new CarInsuranceProposal("", 2001);
-        CarInsuranceQuote quote = carInsuranceServiceMock.getQuote(proposal, ratingEngine);
+        CarInsuranceQuote quote = carInsuranceServiceMock.getQuote(proposal);
         assertFalse(quote.isInsurable());
     }
 }

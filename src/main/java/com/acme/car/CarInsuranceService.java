@@ -2,5 +2,5 @@ package com.acme.car;
 
 public interface CarInsuranceService {
 
-    CarInsuranceQuote getQuote(CarInsuranceProposal carInsuranceProposal, RatingEngine rater);
+    CarInsuranceQuote getQuote(CarInsuranceProposal carInsuranceProposal);
 }

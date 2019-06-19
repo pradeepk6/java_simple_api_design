@@ -7,16 +7,18 @@ import com.theftwatch.TheftRiskChecker;
 public class CarInsuranceServiceImpl implements CarInsuranceService {
 
     private TheftRiskChecker theftRiskChecker;
+    private RatingEngine ratingEngine;
 
-    public CarInsuranceServiceImpl(TheftRiskChecker theftRiskCheckerImpl) {
-        this.theftRiskChecker = theftRiskCheckerImpl;
+    public CarInsuranceServiceImpl(RatingEngine ratingEngine, TheftRiskChecker theftRiskChecker) {
+        this.theftRiskChecker = theftRiskChecker;
+        this.ratingEngine = ratingEngine;
     }
 
     @Override
-    public CarInsuranceQuote getQuote(CarInsuranceProposal proposal, RatingEngine rater) {
+    public CarInsuranceQuote getQuote(CarInsuranceProposal proposal) {
 
-        TheftRisk theftRisk = null;
-        CarInsuranceQuote carInsuranceQuote = null;
+        TheftRisk theftRisk;
+        CarInsuranceQuote carInsuranceQuote;
 
         try {
             theftRisk = theftRiskChecker.getRisk(proposal.getPostcode());
@@ -26,7 +28,7 @@ public class CarInsuranceServiceImpl implements CarInsuranceService {
             throw new TheftRiskServiceFailureException("TheftRisk Service has failed", e);
         }
 
-        carInsuranceQuote = rater.calculatePremium(proposal, theftRisk);
+        carInsuranceQuote = ratingEngine.calculatePremium(proposal, theftRisk);
 
         return carInsuranceQuote;
     }
